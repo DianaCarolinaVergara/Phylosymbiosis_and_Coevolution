@@ -79,6 +79,22 @@ TreeH <- read.tree("HOST_tree.txt")
 TreeP <- read.tree("BACTERIA_tree.txt")
 HP <- as.matrix(read.table("Binary_PACo_coevolution.txt", header=TRUE))
 ```
+
+
+First, you need to check that you have:
+- [X] Installed qiime2 and qiime1 at your HPC cluster
+- [X] Installed RStudio in your desktop or HPC cluster environment.
+- [X] Load a conda environment `module load anaconda/python3.7`
+- [X] Activate qiime2 source `source activate qiime2-2019.7`
+- [X] Load R packages: `ape`, `vegan`
+- [ ] Preferable start an interactive session or a job.
+
+.
+
+![](https://qiime2.org/assets/img/q2cli.png)
+![qiime2](https://qiime2.org/assets/img/qiime2.svg)
+![](http://ape-package.ird.fr/image/new_logo_gold.png)
+
 _____________
 
 #### References
