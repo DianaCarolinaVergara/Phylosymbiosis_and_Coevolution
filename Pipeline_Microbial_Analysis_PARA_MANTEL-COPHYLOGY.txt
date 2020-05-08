@@ -1,0 +1,351 @@
+###SCRIPT FINAL PARA COPHYLOGENY
+##n=69
+##Muestras en Comun
+
+#REFERENCES
+
+https://s3-us-west-2.amazonaws.com/qiime2-workshops/fmt-cdiff/index.html#fmt-for-recurrent-clostridium-difficile-infection-tutorial
+https://isugenomics.github.io/bioinformatics-workbook/dataAnalysis/Metagenomics/Qiime2.html
+http://compbio.ucsd.edu/wp-content/uploads/2018/07/20180621_oslo_university_microbiome_analysis_with_qiime2_tutorial.pdf
+https://chmi-sops.github.io/mydoc_qiime2.html
+
+
+#PICRUSt
+http://picrust.github.io/picrust/scripts/index.html#index-scripts
+http://picrust.github.io/picrust/tutorials/qiime_tutorial.html#qiime-tutorial
+http://picrust.github.io/picrust/tutorials/qiime_tutorial.html#qiime-tutorial
+http://qiime.org/scripts/assign_taxonomy.html
+#CARPETA
+"/hpcfs/home/dc.vergara10/dc.vergara10/Muricea/Bacte_Filtered/"
+
+#Interactive session
+
+srun -N 1 -c 4 --mem=20g --time=48:00:00 --pty bash
+
+#PARA QIIME 2 (este se encuentra configurado como un ambiente para python 3):
+
+module load anaconda/python3.7 
+source activate qiime2-2019.7
+
+___
+
+#Import Data (Transform .fastq.gz to .qza
+
+qiime tools import \
+  --type 'SampleData[PairedEndSequencesWithQuality]' \
+  --input-path lane1 \
+  --input-format CasavaOneEightSingleLanePerSampleDirFmt \
+  --output-path demux-paired-end_FINAL.qza
+
+qiime demux summarize \
+  --i-data demux-paired-end_FINAL.qza \
+  --o-visualization demux_FINAL.qzv
+
+#Quality filter - DADA2
+
+qiime dada2 denoise-single \
+  --i-demultiplexed-seqs demux-paired-end_FINAL.qza \
+  --p-trim-left 0 \
+  --p-trunc-len 150 \
+  --o-representative-sequences rep-seqs-dada2_FINAL.qza \
+  --o-table table-dada2_FINAL.qza \
+  --o-denoising-stats stats-dada2_FINAL.qza
+
+
+---
+#Features table construction (OTUs TABLE)
+####PROBLEMA EN 2019.7
+
+qiime feature-table summarize \
+  --i-table table-dada2_FINAL.qza \
+  --m-sample-metadata-file sample_metadata.txt \
+  --o-visualization full-table_FINAL.qzv
+qiime feature-table tabulate-seqs \
+  --i-data rep-seqs-dada2_FINAL.qza \
+  --o-visualization rep-seqs_FINAL.qzv
+
+qiime fragment-insertion sepp \
+  --i-representative-sequences rep-seqs-dada2_FINAL.qza \
+  --p-threads 4 \
+  --o-tree insertion-tree_FINAL.qza \
+  --o-placements insertion-placements_FINAL.qza
+
+qiime fragment-insertion filter-features \
+  --i-table table-dada2_FINAL.qza \
+  --i-tree insertion-tree_FINAL.qza \
+  --o-filtered-table table_FINAL.qza \
+  --o-removed-table removed-table_FINAL.qza
+qiime feature-table summarize \
+  --i-table table_FINAL.qza \
+  --m-sample-metadata-file sample_metadata.txt \
+  --o-visualization table_FINAL.qzv
+qiime feature-table summarize \
+  --i-table removed-table_FINAL.qza \
+  --m-sample-metadata-file sample_metadata.txt \
+  --o-visualization removed-table_FINAL.qzv
+
+#Alpha rarefaction plotting
+
+qiime diversity alpha-rarefaction \
+  --i-table table_FINAL.qza \
+  --i-phylogeny insertion-tree_FINAL.qza \
+  --p-max-depth 65000 \
+  --m-metadata-file sample_metadata.txt \
+  --o-visualization alpha-rarefaction_FINAL.qzv
+
+qiime diversity core-metrics-phylogenetic \
+  --i-phylogeny insertion-tree_FINAL.qza \
+  --i-table table_FINAL.qza \
+  --m-metadata-file sample_metadata.txt \
+  --p-sampling-depth 15000 \
+  --output-dir core-metrics-results-FINAL
+
+
+#Alpha-Beta diversity Analysis
+
+
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results-FINAL/bray_curtis_distance_matrix.qza \
+  --m-metadata-file sample_metadata.txt \
+  --m-metadata-column species \
+    --o-visualization core-metrics-results-FINAL/bray_curtis-species-significance.qzv
+
+
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results-FINAL/bray_curtis_distance_matrix.qza \
+  --m-metadata-file sample_metadata.txt \
+  --m-metadata-column codigo \
+    --o-visualization core-metrics-results-FINAL/bray_curtis-codigo-significance.qzv
+
+#################
+
+qiime emperor plot \
+  --i-pcoa core-metrics-results-FINAL/bray_curtis_pcoa_results.qza \
+  --m-metadata-file sample_metadata.txt \
+  --p-custom-axes species \
+  --o-visualization core-metrics-results-FINAL/bray-curtis-emperor-species.qzv
+
+---
+#Taxonomic classification
+
+wget \
+  -O "gg-13-8-99-515-806-nb-classifier.qza" \
+  "https://data.qiime2.org/2018.11/common/gg-13-8-99-515-806-nb-classifier.qza"
+
+
+qiime feature-classifier classify-sklearn \
+  --i-classifier gg-13-8-99-515-806-nb-classifier_FINAL.qza \
+  --i-reads rep-seqs-dada2_FINAL.qza \
+  --o-classification taxonomy_FINAL.qza
+
+
+qiime metadata tabulate \
+  --m-input-file taxonomy_FINAL.qza \
+  --o-visualization taxonomy_FINAL.qzv
+
+___
+
+qiime taxa barplot \
+  --i-table table_FINAL.qza \
+  --i-taxonomy taxonomy_FINAL.qza \
+  --m-metadata-file sample_metadata.txt \
+  --o-visualization taxa-bar-plots_FINAL.qzv
+___
+
+#Construct a Phylogeny
+Phylogenetics
+There are a number of diversity metrics like unifrac distance that require the construction of a phylogenetic tree.
+
+
+#Multiple sequence alignment
+#First Mafft is used to align the sequences
+
+time qiime alignment mafft \
+  --i-sequences rep-seqs-dada2_FINAL.qza \
+  --o-alignment aligned-rep-seqs_FINAL.qza
+
+#Masking sites
+#Some sites in the alignment are not phylogenetically informative. These sites are masked.
+
+time qiime alignment mask \
+  --i-alignment aligned-rep-seqs_FINAL.qza \
+  --o-masked-alignment masked-aligned-rep-seqs_FINAL.qza
+
+#Creating a Tree
+
+time qiime phylogeny fasttree \
+  --i-alignment masked-aligned-rep-seqs_FINAL.qza \
+  --o-tree unrooted-tree_FINAL.qza \
+  --o-visualization unrooted-tree_FINAL.qzv
+
+#Download the unrooted-tree.qzv file and open it in iTOL <<https://itol.embl.de/>>
+
+#OPTIONAL
+#Midpoint rooting
+Fastree creates an unrooted tree. We can root the tree at it’s midpoint with this command:
+
+time qiime phylogeny midpoint-root \
+  --i-tree unrooted-tree_FINAL.qza \
+  --o-rooted-tree rooted-tree_FINAL.qza
+
+---
+time qiime alignment mafft \
+  --i-sequences taxonomy_FINAL.qza \
+  --o-alignment aligned-rep-seqs_FINAL.qza
+
+#MANTEL-TEST
+
+module load anaconda/python2
+module load qiime/1.9.1
+
+qiime tools export  --input-path "/hpcfs/home/dc.vergara10/dc.vergara10/Muricea/Bacte_Filtered/core-metrics-results-FINAL/bray_curtis_distance_matrix.qza" --output-path "/hpcfs/home/dc.vergara10/dc.vergara10/Muricea/Bacte_Filtered/FINAL_TEST/"
+
+#Correlogram
+compare_distance_matrices.py -i Muricea_matrix_distance.txt,Bacte_Incomplete_matrix_distance.txt --method=mantel_corr -o mantel_correlogram -n 10000  
+
+#Run Mantel-test
+compare_distance_matrices.py -i Muricea_matrix_distance.txt,Bacte_Incomplete_matrix_distance.txt --method=mantel -n 10000  --output_dir mantel
+
+
+################
+#HACER HASTA ACÁ
+###############
+
+_____
+
+#Heatmap (version 2018.4)
+
+qiime taxa collapse \
+  --i-table table.qza \
+  --i-taxonomy taxonomy.qza \
+  --p-level family \
+  --o-collapsed-table collapsed_family_table.qza
+
+
+qiime feature-table heatmap \
+  --i-table table.qza  \
+  --m-metadata-file sample_metadata.txt \
+  --m-metadata-column species  \
+  --p-normalize \
+  --p-title Heatmap Species \
+  --o-visualization feature_heatmap.qzv
+
+
+#Classifiers
+#We can use a random forest classifier directly within QIIME via the qiime sample-classifier tool.
+#https://chmi-sops.github.io/mydoc_qiime2.html
+#https://github.com/qiime2/q2-sample-classifier
+
+qiime sample-classifier classify-samples \
+  --i-table table.qza \
+  --m-metadata-file sample_metadata.txt \
+  --m-metadata-column species \
+  --p-optimize-feature-selection \
+  --p-parameter-tuning \
+  --p-estimator RandomForestClassifier \
+  --p-n-estimators 100 \
+  --o-visualization RamdomForest_moving-pictures-species.qzv
+
+qiime sample-classifier classify-samples \
+  --i-table table.qza \
+  --m-metadata-file sample_metadata.txt \
+  --m-metadata-column species \
+  --p-optimize-feature-selection \
+  --p-parameter-tuning \
+  --p-estimator RandomForestClassifier \
+  --p-n-estimators 100 \
+  --output-dir core-metrics-results
+
+#EXPORT
+
+qiime tools export  --input-path full-table.qza   --output-path core-metrics-results
+
+biom convert -i core-metrics-results/feature-table.biom -o core-metrics-results/otu_table.txt --to-tsv
+
+---
+qiime tools export  --input-path collapsed_family_table.qza   --output-path core-metrics-results
+
+biom convert -i core-metrics-results/feature-table.biom -o core-metrics-results/otu_family_table.txt --to-tsv
+
+---
+qiime tools export  --input-path collapsed_phylum_table.qza   --output-path core-metrics-results
+
+biom convert -i core-metrics-results/feature-table.biom -o core-metrics-results/otu_phylum_table.txt --to-tsv
+
+---
+qiime tools export  --input-path taxonomy.qza   --output-path core-metrics-results
+
+biom convert -i core-metrics-results/feature-table.biom -o core-metrics-results/taxonomy.txt --to-tsv
+
+
+####
+
+#Distance-matrix???
+
+qiime metadata distance-matrix \
+  --m-metadata-file sample_metadata.txt \
+  --m-metadata-column SampleID 
+ 
+#MANTEL TEST
+
+qiime tools export  --input-path "/hpcfs/home/dc.vergara10/dc.vergara10/Muricea/SNPs/bray_curtis_distance_matrix.qza" --output-path "/hpcfs/home/dc.vergara10/dc.vergara10/Muricea/SNPs/"
+
+qiime tools export  --input-path "/hpcfs/home/dc.vergara10/dc.vergara10/Muricea/SNPs/rooted-tree.qza" --output-path "/hpcfs/home/dc.vergara10/dc.vergara10/Muricea/SNPs/"
+
+
+###Hacer compatibles las matrices de Distancia
+
+qiime make_compatible_distance_matrices --i distance-matrix.txt, Muricea_distances.dist-1.txt  --o- "distance-matrix_COMP.txt","Muricea_distances.dist-1_COMP.txt"
+
+
+__________
+
+qiime tools import \
+    --input-path Phylo_FULL_Muricea_nexus.txt \
+    --output-path Phylo_FULL_Muricea_nexus.qza \
+    --type DistanceMatrix
+
+qiime tools import \
+    --input-path ZzHW61iR3OWxp0bXH9o05Q_nexus.txt \
+    --output-path ZzHW61iR3OWxp0bXH9o05Q_nexus.qza \
+    --type DistanceMatrix
+
+qiime tools import \
+    --input-path bray_curtis_distance_matrix.qza \
+    --output-path bray_curtis_distance_matrix.txt \
+    --type DistanceMatrix
+
+qiime diversity mantel \
+  --i-dm1 Phylo_FULL_Muricea_nexus.txt
+  --i-dm2 ZzHW61iR3OWxp0bXH9o05Q_nexus.txt
+
+#O
+qiime diversity mantel \
+  --i-dm1 rooted-tree.qza
+  --i-dm2 bray_curtis_distance_matrix.qza
+
+#O con Qiime1
+
+module load anaconda/python2
+module load qiime/1.9.1
+
+compare_distance_matrices.py -i Phylo_FULL_Muricea_nexus.txt,ZzHW61iR3OWxp0bXH9o05Q_nexus.txt --method=mantel -n 10000
+
+compare_distance_matrices.py -i rooted-tree.qza,bray_curtis_distance_matrix.qza --method=mantel -n 10000
+
+#EN R
+https://stats.idre.ucla.edu/r/faq/how-can-i-perform-a-mantel-test-in-r/
+
+mantel.rtest(station.dists, ozone.dists, nrepet = 9999)
+
+
+##PICRUSt
+http://picrust.github.io/picrust/tutorials/qiime_tutorial.html#qiime-tutorial
+http://picrust.github.io/picrust/scripts/metagenome_contributions.html#metagenome-contributions
+http://picrust.github.io/picrust/index.html
+
+qiime tools export   --input-path table.qza   --output-path exported-feature-table
+
+metagenome_contributions.py -i feature-table.biom -o ko_metagenome_contributions.tab
+
+predict_metagenomes.py 
