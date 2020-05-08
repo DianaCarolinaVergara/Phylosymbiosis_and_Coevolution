@@ -1,0 +1,104 @@
+---
+title: "Mantel Test"
+author: "Vergara, Diana Carolina"
+date: "21/8/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##Mantel Test
+
+#With ape
+
+> library(ape)
+> mantel.test
+function (m1, m2, nperm = 999, graph = FALSE, alternative = "two.sided", 
+    ...) 
+
+> mantel.test("ZzHW61iR3OWxp0bXH9o05Q_nexus.txt", "Phylo_FULL_Muricea_nexus.txt", nperm = 9999, graph = TRUE)
+Error in `diag<-`(`*tmp*`, value = 0) : 
+  only matrix diagonals can be replaced
+  
+```{r}
+library(ape)
+mantel.test("ZzHW61iR3OWxp0bXH9o05Q_nexus.txt", "Phylo_FULL_Muricea_nexus.txt", nperm = 9999, graph = TRUE)
+```
+
+########################
+
+#With ade4
+https://stat.ethz.ch/pipermail/r-help/2006-October/114933.html
+#If the dissimilarity matrices are full, square, symmetric matrices, then you can use:
+
+#mantel.rtest(as.dist(your_mat1), as.dist(your_mat2))
+
+```{r}
+mantel.rtest(as.dist(your_mat1), as.dist(your_mat2))
+```
+
+> library(ade4)
+> mantel.rtest(Phylo_FULL_Muricea_nexus.txt, ZzHW61iR3OWxp0bXH9o05Q_nexus.txt, nrepet = 9999)
+> mantel.rtest("Phylo_FULL_Muricea_nexus.txt", "ZzHW61iR3OWxp0bXH9o05Q_nexus.txt", nrepet = 9999)
+
+> mantel.rtest(as.dist("Phylo_FULL_Muricea_nexus.txt"), as.dist("ZzHW61iR3OWxp0bXH9o05Q_nexus.txt"), nrepet = 9999)
+Error in if (is.euclid(m1) & is.euclid(m2)) { : 
+  missing value where TRUE/FALSE needed
+In addition: Warning messages:
+1: In storage.mode(m) <- "numeric" : NAs introduced by coercion
+2: In storage.mode(m) <- "numeric" : NAs introduced by coercion
+
+dis.muricea<-dist("Phylo_FULL_Muricea_nexus.txt")
+Warning message:
+In dist("Phylo_FULL_Muricea_nexus.txt") : NAs introduced by coercion
+
+
+############
+
+
+#PhyloMantel
+In evolqg: Tools for Evolutionary Quantitative Genetics
+Description
+Performs a matrix correlation with significance given by a phylogenetic Mantel Test. Pairs of rowns and columns are permuted with probability proportional to their phylogenetic distance.
+
+Usage
+1
+2
+3
+PhyloMantel(tree, matrix.1, matrix.2, ..., permutations = 1000,
+  ComparisonFunc = function(x, y) cor(x[lower.tri(x)], y[lower.tri(y)]),
+  k = 1)
+  
+data(dentus)
+data(dentus.tree)
+tree = dentus.tree
+cor.matrices = dlply(dentus, .(species), function(x) cor(x[-5]))
+comparisons = MatrixCor(cor.matrices)
+
+sp.means = dlply(dentus, .(species), function(x) colMeans(x[-5]))
+mh.dist = MultiMahalanobis(means = sp.means, cov.matrix = PhyloW(dentus.tree, cor.matrices)$'6')
+PhyloMantel(dentus.tree, comparisons, mh.dist, k = 10000)
+
+#similar to MantelCor for large k:
+## Not run: 
+PhyloMantel(dentus.tree, comparisons, mh.dist, k = 10000)
+MantelCor(comparisons, mh.dist)
+
+```{r}
+data(dentus)
+data(dentus.tree)
+tree = dentus.tree
+cor.matrices = dlply(dentus, .(species), function(x) cor(x[-5]))
+comparisons = MatrixCor(cor.matrices)
+
+sp.means = dlply(dentus, .(species), function(x) colMeans(x[-5]))
+mh.dist = MultiMahalanobis(means = sp.means, cov.matrix = PhyloW(dentus.tree, cor.matrices)$'6')
+PhyloMantel(dentus.tree, comparisons, mh.dist, k = 10000)
+
+#similar to MantelCor for large k:
+## Not run: 
+PhyloMantel(dentus.tree, comparisons, mh.dist, k = 10000)
+MantelCor(comparisons, mh.dist)
+```
+
