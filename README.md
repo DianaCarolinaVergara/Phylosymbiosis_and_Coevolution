@@ -80,8 +80,28 @@ library(vegan)
 TreeH <- read.tree("HOST_tree.txt")
 TreeP <- read.tree("BACTERIA_tree.txt")
 HP <- as.matrix(read.table("Binary_PACo_coevolution.txt", header=TRUE))
+NLinks = sum(HP)
+host.D <- cophenetic(TreeH)
+para.D <- cophenetic(TreeP)
 ```
 
+```
+PACo <- function (H.dist, P.dist, HP.bin)
+{HP.bin <- which(HP.bin > 0, arr.in=TRUE)
+H.PCo <- pcoa(H.dist, correction="cailliez")$vectors
+P.PCo <- pcoa(P.dist, correction="cailliez")$vectors
+H.PCo <- H.PCo[HP.bin[,1],]
+P.PCo <- P.PCo[HP.bin[,2],]
+list (H.PCo = H.PCo, P.PCo = P.PCo)}
+```
+
+And Procrustes-fit
+
+```
+PACo.fit <- PACo(host.D, para.D, HP)
+HP.proc <- procrustes(PACo.fit$H.PCo, PACo.fit$P.PCo)
+HP.proc
+```
 
 First, you need to check that you have:
 - [X] Installed qiime2 and qiime1 at your HPC cluster
