@@ -31,7 +31,7 @@ You need the previous files obtained in the [16S rRNA Analysis](https://github.c
 
 #### MANTEL Test
 
-The evaluated phylosymbiotic eco-evolutionary pattern, between microbial community and host with the Mantel test to correlate the microbial β-diversity and host phylogeny. The mantel-test comparing the degree of similarity between evolutionary distance matrices showed correlation (with or without Bonferroni correction).
+The evaluated phylosymbiotic eco-evolutionary pattern, between microbial community and host with the Mantel test to correlate the microbial β-diversity and host phylogeny. The [mantel-test](github.com/DianaCarolinaVergara/Phylosymbiosis_and_Coevolution/wiki/3.-Phylosymbiosis) comparing the degree of similarity between evolutionary distance matrices showed correlation (with or without Bonferroni correction).
 
 ```
 qiime tools export  --input-path "/hpcfs/home/dc.vergara10/dc.vergara10/Muricea/SNPs/bray_curtis_distance_matrix.qza" --output-path "/hpcfs/home/dc.vergara10/dc.vergara10/Muricea/SNPs/"
@@ -65,7 +65,7 @@ A superimposition plot as a visual indication of the degree of match between the
 
 #### PACo Test
 
-For this Cophylogenetic analysis we perform a **PACo Test** in [R](https://rstudio.com/).
+For this Cophylogenetic analysis we perform a **[PACo Test](https://github.com/DianaCarolinaVergara/Phylosymbiosis_and_Coevolution/wiki/4.-Cophylogeny)** in [R](https://rstudio.com/).
 
 You need the previous files obtained in the [16S rRNA Analysis](https://github.com/DianaCarolinaVergara/16S-rRNA-Analysis), especifically the phylogentic `fasttree` in the [Construct a Phylogeny analysis](https://github.com/DianaCarolinaVergara/16S-rRNA-Analysis/wiki/10.-Construct-a-Phylogeny). Also need the `host phylogeny`, the result of SNPs Analysis and phylogeny inference (ML).
 
