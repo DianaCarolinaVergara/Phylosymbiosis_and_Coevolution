@@ -57,7 +57,10 @@ qiime tools import     --input-path /home/vergarad/Muricea/Matrices/CARIBE_dista
 ```
  
   * Caribe
+ 
+``` 
 qiime diversity mantel   --i-dm1 /home/vergarad/Muricea/CARIBE_host_distance_matrix_comas.qza --i-dm2 /home/vergarad/Muricea/CARIBE_bacteria_distance_matrix_comas.qza --output-dir /home/vergarad/Muricea/Caribe
+```
 
   * TEP
 
