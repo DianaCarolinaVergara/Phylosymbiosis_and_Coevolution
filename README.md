@@ -43,7 +43,34 @@ qiime diversity mantel \
   --i-dm1 rooted-tree.qza
   --i-dm2 bray_curtis_distance_matrix.qza
   ```
+  #### MANTEL Test PER GEOGRAPHIC LOCATION
   
+  
+ ##### Files:
+ - microbes matrix (.txt converted to .qza)
+ - Muricea host matrix (.txt converted to .qza)
+
+#convert matrix .txt to .qza 
+
+```
+qiime tools import     --input-path /home/vergarad/Muricea/Matrices/CARIBE_distance-matrix_BACTERIA.txt     --output-path CARIBE_bacteria_distance_matrix.qza     --type DistanceMatrix
+```
+ 
+  * Caribe
+qiime diversity mantel   --i-dm1 /home/vergarad/Muricea/CARIBE_host_distance_matrix_comas.qza --i-dm2 /home/vergarad/Muricea/CARIBE_bacteria_distance_matrix_comas.qza --output-dir /home/vergarad/Muricea/Caribe
+
+  * TEP
+
+```
+qiime diversity mantel   --i-dm1 /home/vergarad/Muricea/TEP_host_distance_matrix_comas.qza --i-dm2 /home/vergarad/Muricea/TEP_bacteria_distance_matrix_comas.qza --output-dir /home/vergarad/Muricea/TEP
+
+```
+
+  * Gulf-Mexico
+  
+ ```
+qiime diversity mantel   --i-dm1 /home/vergarad/Muricea/GULF-MEXICO_host_distance_matrix_comas.qza --i-dm2 /home/vergarad/Muricea/GULF-MEXICO_bacteria_distance_matrix_comas.qza --output-dir /home/vergarad/Muricea/Gulf_Mex
+ ```
 _____________
   
 ### Coevolution
