@@ -52,6 +52,16 @@ qiime diversity mantel \
 
 #convert matrix .txt to .qza 
 
+https://forum.qiime2.org/t/converting-distance-matrix-txt-to-qza-file/7335/2
+
+
+```
+qiime tools import \
+    --input-path old_distance_matrix.txt \
+    --output-path new_distance_matrix.qza \
+    --type DistanceMatrix
+```
+
 ```
 qiime tools import     --input-path /home/vergarad/Muricea/Matrices/CARIBE_distance-matrix_BACTERIA.txt     --output-path CARIBE_bacteria_distance_matrix.qza     --type DistanceMatrix
 ```
