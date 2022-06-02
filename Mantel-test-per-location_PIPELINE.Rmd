@@ -1,0 +1,122 @@
+---
+title: "Mantel-tests_CARIBE-TEP-GULFMEX"
+author: "Diana Carolina Vergara"
+date: "1/6/2022"
+output: html_document
+---
+
+# Mantel tests
+
+SSH session to vergarad@greatlakes.arc-ts.umich.edu  
+
+cd /home/vergarad/Muricea/Matrices/
+
+
+[vergarad@gl-login1 ~]$ conda activate qiime2
+
+(qiime2) [vergarad@gl-login1 ~]$ qiime info
+System versions
+Python version: 3.6.10
+QIIME 2 release: 2020.8
+QIIME 2 version: 2020.8.0
+q2cli version: 2020.8.0
+
+Installed plugins
+alignment: 2020.8.0
+composition: 2020.8.0
+cutadapt: 2020.8.0
+dada2: 2020.8.0
+deblur: 2020.8.0
+demux: 2020.8.0
+diversity: 2020.8.0
+diversity-lib: 2020.8.0
+emperor: 2020.8.0
+feature-classifier: 2020.8.0
+feature-table: 2020.8.0
+fragment-insertion: 2020.8.0
+gneiss: 2020.8.0
+longitudinal: 2020.8.0
+metadata: 2020.8.0
+phylogeny: 2020.8.0
+quality-control: 2020.8.0
+quality-filter: 2020.8.0
+sample-classifier: 2020.8.0
+taxa: 2020.8.0
+types: 2020.8.0
+vsearch: 2020.8.0
+
+
+### import .txt matrices
+
+### convert .txt into .qza
+
+qiime tools import \
+    --input-path old_distance_matrix.txt \
+    --output-path new_distance_matrix.qza \
+    --type DistanceMatrix
+    
+
+```
+(qiime2) [vergarad@gl-login1 Muricea]$ qiime tools import     --input-path /home/vergarad/Muricea/Matrices/CARIBE_Muricea_distances.dist_FINAL.txt     --output-path CARIBE_host_distance_matrix.qza     --type DistanceMatrix
+
+Imported /home/vergarad/Muricea/Matrices/CARIBE_Muricea_distances.dist_FINAL.txt as DistanceMatrixDirectoryFormat to CARIBE_host_distance_matrix.qza
+```
+
+```
+(qiime2) [vergarad@gl-login1 Muricea]$ qiime tools import     --input-path /home/vergarad/Muricea/Matrices/CARIBE_distance-matrix_BACTERIA.txt     --output-path CARIBE_bacteria_distance_matrix.qza     --type DistanceMatrix
+
+Imported /home/vergarad/Muricea/Matrices/CARIBE_distance-matrix_BACTERIA.txt as DistanceMatrixDirectoryFormat to CARIBE_bacteria_distance_matrix.qza
+```
+
+
+```
+(qiime2) [vergarad@gl-login1 Muricea]$ qiime tools import     --input-path /home/vergarad/Muricea/Matrices/GULF-MEXICO_distance-matrix_BACTERIA.txt     --output-path GULF-MEXICO_bacteria_distance_matrix.qza     --type DistanceMatrix  
+Imported /home/vergarad/Muricea/Matrices/GULF-MEXICO_distance-matrix_BACTERIA.txt as DistanceMatrixDirectoryFormat to GULF-MEXICO_bacteria_distance_matrix.qza
+```
+
+```
+(qiime2) [vergarad@gl-login1 Muricea]$ qiime tools import     --input-path /home/vergarad/Muricea/Matrices/GULF-MEXICO_Muricea_distances.dist_FINAL.txt     --output-path GULF-MEXICO_host_distance_matrix.qza     --type DistanceMatrix  
+Imported /home/vergarad/Muricea/Matrices/GULF-MEXICO_Muricea_distances.dist_FINAL.txt as DistanceMatrixDirectoryFormat to GULF-MEXICO_host_distance_matrix.qza
+```
+
+```
+(qiime2) [vergarad@gl-login1 Muricea]$
+(qiime2) [vergarad@gl-login1 Muricea]$ qiime tools import     --input-path /home/vergarad/Muricea/Matrices/TEP_Muricea_distances.dist_FINAL.txt     --output-path TEP_host_distance_matrix.qza     --type DistanceMatrix
+
+Imported /home/vergarad/Muricea/Matrices/TEP_Muricea_distances.dist_FINAL.txt as DistanceMatrixDirectoryFormat to TEP_host_distance_matrix.qza
+```
+
+```
+(qiime2) [vergarad@gl-login1 Muricea]$
+
+(qiime2) [vergarad@gl-login1 Muricea]$ qiime tools import     --input-path /home/vergarad/Muricea/Matrices/TEP_distance-matrix_BACTERIA.txt     --output-path TEP_bacteria_distance_matrix.qza     --type DistanceMatrix
+Imported /home/vergarad/Muricea/Matrices/TEP_distance-matrix_BACTERIA.txt as DistanceMatrixDirectoryFormat to TEP_bacteria_distance_matrix.qza
+(qiime2) [vergarad@gl-login1 Muricea]$
+
+```
+
+## MANTEL Tests
+
+
+(two-sided, Method_ Spearman)
+
+
+* CARIBE
+```
+qiime diversity mantel   --i-dm1 /home/vergarad/Muricea/CARIBE_host_distance_matrix_comas.qza --i-dm2 /home/vergarad/Muricea/CARIBE_bacteria_distance_matrix_comas.qza --output-dir /home/vergarad/Muricea/Caribe
+```
+
+* TEP
+```
+qiime diversity mantel   --i-dm1 /home/vergarad/Muricea/TEP_host_distance_matrix_comas.qza --i-dm2 /home/vergarad/Muricea/TEP_bacteria_distance_matrix_comas.qza --output-dir /home/vergarad/Muricea/TEP
+```
+
+* GULF-MEX
+```
+qiime diversity mantel   --i-dm1 /home/vergarad/Muricea/GULF-MEXICO_host_distance_matrix_comas.qza --i-dm2 /home/vergarad/Muricea/GULF-MEXICO_bacteria_distance_matrix_comas.qza --output-dir /home/vergarad/Muricea/Gulf_Mex
+
+```
+
+_____________________________________
+
+
